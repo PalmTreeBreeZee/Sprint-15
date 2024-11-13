@@ -1,7 +1,23 @@
 const router = require('express').Router();
+const bcrypt = require('bcryptjs')
+const db = require('../../data/dbConfig')
 
-router.post('/register', (req, res) => {
-  res.end('implement register, please!');
+router.post('/register', async (req, res) => {
+
+  try {
+    const { username, password } = req.body
+    const hash = bcrypt.hashSync(password, 6)
+    const newUser = { username, password: hash }
+    // const makingUser = await db('users').insert(newUser)
+    // makingUser
+    // const getUser = await db('users').select(id, username, password).first()
+    // console.log(getUser)
+    res.status(201).json(newUser)
+  }
+  catch (err) {
+    res.status(400).send(err)
+  }
+
   /*
     IMPLEMENT
     You are welcome to build additional middlewares to help with the endpoint's functionality.
@@ -16,7 +32,7 @@ router.post('/register', (req, res) => {
     2- On SUCCESSFUL registration,
       the response body should have `id`, `username` and `password`:
       {
-        "id": 1,
+        "id": 1,m
         "username": "Captain Marvel",
         "password": "2a$08$jG.wIGR2S4hxuyWNcBf9MuoC4y0dNy7qC/LbmtuFBSdIhWks2LhpG"
       }
