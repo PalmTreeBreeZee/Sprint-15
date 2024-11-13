@@ -8,11 +8,16 @@ router.post('/register', async (req, res) => {
     const { username, password } = req.body
     const hash = bcrypt.hashSync(password, 6)
     const newUser = { username, password: hash }
-    // const makingUser = await db('users').insert(newUser)
-    // makingUser
-    // const getUser = await db('users').select(id, username, password).first()
-    // console.log(getUser)
-    res.status(201).json(newUser)
+    const makingUser = await db('users').insert(newUser).select("id", "username", "password")
+
+
+    const lastUser = await db('users')
+      .select('id', 'username', 'password')
+      .orderBy('id', 'desc')
+      .first()
+
+
+    res.status(201).json(lastUser)
   }
   catch (err) {
     res.status(400).send(err)
