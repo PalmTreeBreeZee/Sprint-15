@@ -16,7 +16,7 @@ router.post('/register', validation, async (req, res) => {
       .select('id', 'username', 'password')
       .orderBy('id', 'desc')
       .first()
-    console.log(newUser)
+
 
     res.status(201).json(lastUser)
   }
