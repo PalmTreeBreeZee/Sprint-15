@@ -1,21 +1,22 @@
 const router = require('express').Router();
 const bcrypt = require('bcryptjs')
 const db = require('../../data/dbConfig')
+const validation = require("./auth-middleware")
 
-router.post('/register', async (req, res) => {
+router.post('/register', validation, async (req, res) => {
 
   try {
+
     const { username, password } = req.body
     const hash = bcrypt.hashSync(password, 6)
     const newUser = { username, password: hash }
-    const makingUser = await db('users').insert(newUser).select("id", "username", "password")
-
+    await db('users').insert(newUser)
 
     const lastUser = await db('users')
       .select('id', 'username', 'password')
       .orderBy('id', 'desc')
       .first()
-
+    console.log(newUser)
 
     res.status(201).json(lastUser)
   }
