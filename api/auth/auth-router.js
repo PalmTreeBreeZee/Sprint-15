@@ -54,17 +54,42 @@ router.post('/register', validation, async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body
-    let user = await db("users").select().where("username", username).first()
+    if (!username || !password) {
+      return res.status(401).json({
+        message: "username and password required"
+      })
+    }
+    const user = await db("users").select().where("username", username).first()
+
 
     if (user && bcrypt.compareSync(password, user.password)) {
-      req.session.user = user
-      res.json({
-        message: `welcome, ${username}`,
-        token: user.password
+      req.session.regenerate((err) => {
+        if (err) {
+          return res.status(500).json({ error: "Session error" });
+        }
+        // Set user data in the new session
+        req.session.user = user;
+        // Save the session to update the expire date
+        req.session.save((err) => {
+          if (err) {
+            return res.status(500).json({ error: "Session save error" });
+          }
+
+          res.json({
+            message: `welcome, ${username}`,
+            token: user.password,//start at 57mins
+          })
+        });
+      });
+    } else {
+      return res.status(401).json({
+        message: "invalid credentials"
       })
     }
   } catch (err) {
-    res.send(err)
+    return res.status(401).json({
+      message: "invalid credentials"
+    })
   }
   /*
     IMPLEMENT
@@ -76,7 +101,7 @@ router.post('/login', async (req, res) => {
         "password": "foobar"
       }
 
-    2- On SUCCESSFUL login,
+    2- }On SUCCESSFUL login,
       the response body should have `message` and `token`:
       {
         "message": "welcome, Captain Marvel",

@@ -1,9 +1,22 @@
-module.exports = (req, res, next) => {
-  if (req.session.user) {
-    next()
-  } else {
+const db = require("../../data/dbConfig")
+module.exports = async (req, res, next) => {
+
+  const activeSession = await db("sessions").select("sess")
+  const currentTime = Date.now();
+  const [expired] = await db("sessions").select("expired")
+
+
+  console.log(req.session.cookie, expired, req.session.cookie._expires) //
+
+  if (!activeSession) {
     return res.status(401).json({ message: 'token required' })
   }
+  else if (!expired && req.session.cookie._expires) {
+    return res.status(401).json({ message: 'token expired' });
+  }
+
+  //Check at 1hr and 3mins
+  next()
 
   /*
     IMPLEMENT

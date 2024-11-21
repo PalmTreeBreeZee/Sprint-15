@@ -7,7 +7,7 @@ const restrict = require('./middleware/restricted.js');
 const authRouter = require('./auth/auth-router.js');
 const jokesRouter = require('./jokes/jokes-router.js');
 const session = require("express-session")
-const { ConnectSessionKnexStore } = require("connect-session-knex"); //why is this giving me an error
+const { ConnectSessionKnexStore } = require("connect-session-knex"); //why is this giving me an error: It needed to be deconstructed
 const server = express();
 
 server.use(helmet());
@@ -17,7 +17,7 @@ server.use(session({
     name: "Goku",
     secret: "Keeponthelow",
     cookie: {
-        maxAge: 100 * 60 * 60,
+        maxAge: 5000, //milliseconds
         secure: false, //Set to true on live server
         httpOnly: false, //Set to true means that JS cannot hit it
     },
@@ -29,7 +29,7 @@ server.use(session({
         tablename: 'sessions',
         sidfieldname: 'sid',
         createtable: true,
-        clearInterval: 100 * 60 * 60
+        clearInterval: 5000 //milliseconds
     })
 }))
 
