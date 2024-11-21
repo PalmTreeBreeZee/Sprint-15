@@ -7,11 +7,11 @@ async function validation(req, res, next) {
     console.log(username)
 
     if (!req.body.username || !req.body.password) {
-        return res.status(401).send("username and password required")
+        return res.status(401).json({ message: "username and password required" })
     }
 
     if (username) {
-        return res.status(401).send("username taken")
+        return res.status(401).json({ message: "username taken" })
     }
     next()
 } 
