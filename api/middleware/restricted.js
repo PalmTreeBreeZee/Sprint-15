@@ -15,7 +15,7 @@ module.exports = async (req, res, next) => {
     //Check at 1hr and 3mins
     next()
   } catch (error) {
-    res.status(401).json({ message: "token required" })
+    return res.status(401).json({ message: "token required" })
   }
 
   /*
