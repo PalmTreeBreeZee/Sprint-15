@@ -7,7 +7,7 @@ async function validation(req, res, next) {
     try {
         let user = req.body.username
         let username = await db("users").select("username").where("username", user).first()
-        console.log(req)
+        console.log(!req.body.username, !req.body.password)
 
         if (!req.body.username || !req.body.password || !req.body) {
             return res.status(401).json({ message: "username and password required" })
@@ -20,6 +20,6 @@ async function validation(req, res, next) {
 
 
     } catch (error) {
-        next(error)
+        res.status(400).json({ message: "username and password required" })
     }
 } 
