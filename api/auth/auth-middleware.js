@@ -2,11 +2,13 @@ const db = require("../../data/dbConfig")
 module.exports = validation
 
 async function validation(req, res, next) {
+
+
     let user = req.body.username
     let username = await db("users").select("username").where("username", user).first()
-    console.log(username)
+    console.log(req)
 
-    if (!req.body.username || !req.body.password) {
+    if (!req.body.username || !req.body.password || !req.body) {
         return res.status(401).json({ message: "username and password required" })
     }
 
@@ -14,4 +16,6 @@ async function validation(req, res, next) {
         return res.status(401).json({ message: "username taken" })
     }
     next()
+
+
 } 
