@@ -4,18 +4,22 @@ module.exports = validation
 async function validation(req, res, next) {
 
 
-    let user = req.body.username
-    let username = await db("users").select("username").where("username", user).first()
-    console.log(req)
+    try {
+        let user = req.body.username
+        let username = await db("users").select("username").where("username", user).first()
+        console.log(req)
 
-    if (!req.body.username || !req.body.password || !req.body) {
-        return res.status(401).json({ message: "username and password required" })
+        if (!req.body.username || !req.body.password || !req.body) {
+            return res.status(401).json({ message: "username and password required" })
+        }
+
+        if (username) {
+            return res.status(401).json({ message: "username taken" })
+        }
+        next()
+
+
+    } catch (error) {
+        next(error)
     }
-
-    if (username) {
-        return res.status(401).json({ message: "username taken" })
-    }
-    next()
-
-
 } 
