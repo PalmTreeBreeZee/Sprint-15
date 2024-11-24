@@ -1,12 +1,12 @@
 const db = require("../../data/dbConfig")
 module.exports = async (req, res, next) => {
 
-  const activeSession = await db("sessions").select("sess")
+  const [activeSession] = await db("sessions").select("sess")
   const currentTime = Date.now();
   const [expired] = await db("sessions").select("expired")
 
 
-  console.log(req.session.cookie, expired, req.session.cookie._expires) //
+  console.log(activeSession, expired, req.session.cookie._expires) //
 
   if (!activeSession) {
     return res.status(401).json({ message: 'token required' })
