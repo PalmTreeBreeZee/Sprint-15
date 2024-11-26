@@ -2,6 +2,7 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs')
 const db = require('../../data/dbConfig')
 const validation = require("./auth-middleware")
+const jwt = require("jsonwebtoken") //Readup on jwt
 
 router.post('/register', validation, async (req, res) => {
 
@@ -63,6 +64,9 @@ router.post('/login', async (req, res) => {
 
 
     if (user && bcrypt.compareSync(password, user.password)) {
+      const v = '123'
+      const token = jwt.sign(user, v)
+
       req.session.regenerate((err) => {
         if (err) {
           return res.status(500).json({ error: "Session error" });
@@ -77,7 +81,7 @@ router.post('/login', async (req, res) => {
 
           res.json({
             message: `welcome, ${username}`,
-            token: user.password,//start at 57mins
+            token //start at 57mins
           })
         });
       });
