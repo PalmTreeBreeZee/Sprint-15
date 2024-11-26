@@ -9,13 +9,14 @@ module.exports = async (req, res, next) => {
     const expired = req.session.cookie['_expires']
     const token = req.session.user
     const secret = '123'
+    console.log(token, currentTime > expired.toISOString(), currentTime, expired)
     //const token = authHeader && authHeader.split(' ')[1]
     if (currentTime > expired.toISOString()) {
       return res.status(401).json({ message: 'token expired' });
     }
-    console.log(token, expired.toISOString() < currentTime) //
+    //
     if (!token) {
-      return res.status(401).json({ message: 'token required' });
+      return res.status(401).json({ message: 'token invalid' });
     }
 
     // jwt.verify(token, secret, (err, next) => {
@@ -26,7 +27,7 @@ module.exports = async (req, res, next) => {
     next()
   } catch (error) {
 
-    return res.status(401).json({ message: "token required" })
+    return res.status(401).json({ message: "token invalid" })
   }
 
   /*
