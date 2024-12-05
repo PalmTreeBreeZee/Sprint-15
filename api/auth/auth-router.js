@@ -65,10 +65,10 @@ router.post('/login', async (req, res) => {
     if (user && bcrypt.compareSync(password, user.password)) {
       const payload = {
         id: user.id,
-        username: user.username,
+        username: user.username
       };
       const secret = process.env.JWT_SECRET || '123';
-      const token = jwt.sign(payload, secret, { expiresIn: '60s' });
+      const token = jwt.sign(payload, secret, { expiresIn: '5m' });
 
       res.json({
         message: `welcome, ${username}`,

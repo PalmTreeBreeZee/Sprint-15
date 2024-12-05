@@ -4,23 +4,27 @@ const jwt_decode = require('jwt-decode')
 module.exports = (req, res, next) => {
   // Extract token from Authorization header (format: Bearer <token>)
 
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
-    return res.status(401).json({ message: 'Authorization header required' });
-  }
 
-  const token = authHeader.split(' ')[1]; // Extract the token part
-  const decoded = jwt_decode.jwtDecode(token)
-  console.log(decoded)
-  if (!token) {
-    return res.status(401).json({ message: 'Token required' });
-  }
 
   try {
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(' ')[1]; // Extract the token part
+    const decoded = jwt_decode.jwtDecode(token)
+
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authorization header required' });
+    }
+
+
+    if (!token) {
+      return res.status(401).json({ message: 'Token required' });
+    }
     const secret = '123'; // Use the correct secret for verification
     jwt.verify(token, secret, (err, user) => {
+
       if (err) return res.status(403).json({ message: 'invalid token' })
-      req.user = decoded;
+
+      req.user = user;
       next()
     }) // Verify the token
 
@@ -28,7 +32,7 @@ module.exports = (req, res, next) => {
 
 
     // Call next middleware
-    next();
+
   } catch (err) {
     // Handle specific JWT errors
     if (err.name === 'TokenExpiredError') {
