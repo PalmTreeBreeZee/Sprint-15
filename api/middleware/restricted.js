@@ -1,24 +1,25 @@
 const jwt = require('jsonwebtoken');
-const jwt_decode = require('jwt-decode')
+
 
 module.exports = (req, res, next) => {
   // Extract token from Authorization header (format: Bearer <token>)
 
+  const authHeader = req.headers.authorization;
+  // Extract the token part
 
+  console.log(authHeader)
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Authorization header required' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Token required' });
+  }
 
   try {
-    const authHeader = req.headers.authorization;
-    const token = authHeader.split(' ')[1]; // Extract the token part
-    const decoded = jwt_decode.jwtDecode(token)
 
-    if (!authHeader) {
-      return res.status(401).json({ message: 'Authorization header required' });
-    }
-
-
-    if (!token) {
-      return res.status(401).json({ message: 'Token required' });
-    }
     const secret = '123'; // Use the correct secret for verification
     jwt.verify(token, secret, (err, user) => {
 
@@ -40,7 +41,7 @@ module.exports = (req, res, next) => {
     } else if (err.name === 'JsonWebTokenError') {
       return res.status(401).json({ message: 'Invalid token' });
     } else {
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(501).json({ message: 'Internal server error' });
     }
   }
 }
