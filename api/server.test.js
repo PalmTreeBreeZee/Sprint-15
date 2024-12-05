@@ -16,7 +16,7 @@ afterAll(async () => {
 describe('Get Jokes', () => {
   it('Boots unauthorized users', () => {
     return request(server).get('/api/jokes')
-      .expect(500)
+      .expect(401)
   })
 
 })
