@@ -1,44 +1,55 @@
-const db = require("../../data/dbConfig")
-const jwt = require("jsonwebtoken")
+const jwt = require('jsonwebtoken');
+const jwt_decode = require('jwt-decode')
 
-module.exports = async (req, res, next) => {
+module.exports = (req, res, next) => {
+  // Extract token from Authorization header (format: Bearer <token>)
 
-  try {
-    const [activeSession] = await db("sessions").select("sess")
-    const currentTime = new Date().toISOString();
-    const expired = req.session.cookie['_expires']
-    const token = req.session.user
-    const secret = '123'
-    console.log(token, currentTime > expired.toISOString(), currentTime, expired)
-    //const token = authHeader && authHeader.split(' ')[1]
-    if (currentTime > expired.toISOString()) {
-      return res.status(401).json({ message: 'token expired' });
-    }
-    //
-    if (!token) {
-      return res.status(401).json({ message: 'token invalid' });
-    }
-
-    // jwt.verify(token, secret, (err, next) => {
-    //   if (err) return res.status(403).json({ message: 'token expired' })
-    //   next()
-    // })
-    //Check at 1hr and 3mins
-    next()
-  } catch (error) {
-
-    return res.status(401).json({ message: "token invalid" })
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({ message: 'Authorization header required' });
   }
 
-  /*
-    IMPLEMENT
+  const token = authHeader.split(' ')[1]; // Extract the token part
+  const decoded = jwt_decode.jwtDecode(token)
+  console.log(decoded)
+  if (!token) {
+    return res.status(401).json({ message: 'Token required' });
+  }
 
-    1- On valid token in the Authorization header, call next.
+  try {
+    const secret = '123'; // Use the correct secret for verification
+    jwt.verify(token, secret, (err, user) => {
 
-    2- On missing token in the Authorization header,
-      the response body should include a string exactly as follows: "token required".
+      req.user = decoded;
+      next()
+    }) // Verify the token
 
-    3- On invalid or expired token in the Authorization header,
-      the response body should include a string exactly as follows: "token invalid".
-  */
-};
+    // Attach the decoded payload to the request for use in subsequent middleware
+
+
+    // Call next middleware
+    next();
+  } catch (err) {
+    // Handle specific JWT errors
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired' });
+    } else if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else {
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+}
+
+/*
+  IMPLEMENT
+
+  1- On valid token in the Authorization header, call next.
+
+  2- On missing token in the Authorization header,
+    the response body should include a string exactly as follows: "token required".
+
+  3- On invalid or expired token in the Authorization header,
+    the response body should include a string exactly as follows: "token invalid".
+*/
+

@@ -54,70 +54,58 @@ router.post('/register', validation, async (req, res) => {
 
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body
+    const { username, password } = req.body;
     if (!username || !password) {
-      return res.status(401).json({
-        message: "username and password required"
-      })
+      return res.status(401).json({ message: "username and password required" });
     }
-    const user = await db("users").select().where("username", username).first()
 
+    const user = await db("users").where("username", username).first();
 
+    // Authentication
     if (user && bcrypt.compareSync(password, user.password)) {
-      const v = '123'
-      const token = jwt.sign(user, v)
+      const payload = {
+        id: user.id,
+        username: user.username,
+      };
+      const secret = process.env.JWT_SECRET || '123';
+      const token = jwt.sign(payload, secret, { expiresIn: '60s' });
 
-      req.session.regenerate((err) => {
-        if (err) {
-          return res.status(500).json({ error: "Session error" });
-        }
-        // Set user data in the new session
-        req.session.user = user;
-        // Save the session to update the expire date
-        req.session.save((err) => {
-          if (err) {
-            return res.status(500).json({ error: "Session save error" });
-          }
-
-          res.json({
-            message: `welcome, ${username}`,
-            token //start at 57mins
-          })
-        });
+      res.json({
+        message: `welcome, ${username}`,
+        token,
       });
     } else {
-      return res.status(401).json({
-        message: "invalid credentials"
-      })
+      return res.status(401).json({ message: "invalid credentials" });
     }
   } catch (err) {
-    return res.status(401).json({
-      message: "invalid credentials"
-    })
+    console.error(err); // Log error for debugging
+    return res.status(500).json({ message: "internal server error" });
   }
-  /*
-    IMPLEMENT
-    You are welcome to build additional middlewares to help with the endpoint's functionality.
+})
 
-    1- In order to log into an existing account the client must provide `username` and `password`:
-      {
-        "username": "Captain Marvel",
-        "password": "foobar"
-      }
+/*
+  IMPLEMENT
+  You are welcome to build additional middlewares to help with the endpoint's functionality.
 
-    2- }On SUCCESSFUL login,
-      the response body should have `message` and `token`:
-      {
-        "message": "welcome, Captain Marvel",
-        "token": "eyJhbGciOiJIUzI ... ETC ... vUPjZYDSa46Nwz8"
-      }
+  1- In order to log into an existing account the client must provide `username` and `password`:
+    {
+      "username": "Captain Marvel",
+      "password": "foobar"
+    }
 
-    3- On FAILED login due to `username` or `password` missing from the request body,
-      the response body should include a string exactly as follows: "username and password required".
+  2- }On SUCCESSFUL login,
+    the response body should have `message` and `token`:
+    {
+      "message": "welcome, Captain Marvel",
+      "token": "eyJhbGciOiJIUzI ... ETC ... vUPjZYDSa46Nwz8"
+    }
 
-    4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
-      the response body should include a string exactly as follows: "invalid credentials".
-  */
-});
+  3- On FAILED login due to `username` or `password` missing from the request body,
+    the response body should include a string exactly as follows: "username and password required".
+
+  4- On FAILED login due to `username` not existing in the db, or `password` being incorrect,
+    the response body should include a string exactly as follows: "invalid credentials".
+*/
+
 
 module.exports = router;
