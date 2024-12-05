@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
   try {
     const secret = '123'; // Use the correct secret for verification
     jwt.verify(token, secret, (err, user) => {
-
+      if (err) return res.status(403).json({ message: 'invalid token' })
       req.user = decoded;
       next()
     }) // Verify the token
