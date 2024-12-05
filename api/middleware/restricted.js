@@ -12,8 +12,9 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: 'Authorization header required' });
   }
 
-  const token = authHeader.split(' ')[1];
-
+  let token = authHeader.split(' ')[1];
+  token = token.split('"').join('');
+  console.log(token)
   if (!token) {
     return res.status(401).json({ message: 'Token required' });
   }
